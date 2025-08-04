@@ -220,6 +220,10 @@ class AST_Tests(unittest.TestCase):
                 # This also must not crash:
                 ast.parse(tree, optimize=2)
 
+    def test_compile_after_docstring_removal(self):
+        tree = ast.parse('"""doc"""')
+        compile(tree, '<string>', 'exec', optimize=2)
+
     def test_slice(self):
         slc = ast.parse("x[::]").body[0].value.slice
         self.assertIsNone(slc.upper)

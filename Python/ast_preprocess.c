@@ -441,8 +441,19 @@ astfold_body(asdl_stmt_seq *stmts, PyArena *ctx_, _PyASTPreprocessState *state)
     int docstring = _PyAST_GetDocString(stmts) != NULL;
     if (docstring && (state->optimize >= 2)) {
         /* remove the docstring */
+        stmt_ty st = (stmt_ty)asdl_seq_GET(stmts, 0);
         if (!stmt_seq_remove_item(stmts, 0)) {
             return 0;
+        }
+        if (asdl_seq_LEN(stmts) == 0) {
+            stmt_ty pass_stmt = _PyAST_Pass(st->lineno, st->col_offset,
+                                            st->end_lineno, st->end_col_offset,
+                                            ctx_);
+            if (!pass_stmt) {
+                return 0;
+            }
+            stmts->size++;
+            asdl_seq_SET(stmts, stmts->size - 1, pass_stmt);
         }
         docstring = 0;
     }

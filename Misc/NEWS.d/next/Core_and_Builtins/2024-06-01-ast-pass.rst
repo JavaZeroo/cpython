@@ -1,0 +1,2 @@
+Ensure ``compile()`` succeeds when docstring stripping leaves an empty body
+by inserting a ``pass`` statement during AST preprocessing.
