@@ -1154,6 +1154,17 @@ class TestDistributions(unittest.TestCase):
         self.assertTrue(89_000_000 <= B(100_000_000, 0.9) <= 91_000_000)
 
 
+    @unittest.mock.patch('random.Random.random')
+    def test_binomialvariate_zero_random(self, random_mock):
+        # gh-149221: random() can legitimately return 0.0 (its documented
+        # range is [0.0, 1.0)).  The BG geometric branch must reject that
+        # draw instead of raising "math domain error" from log2(0.0).
+        seq = iter([0.0])
+        random_mock.side_effect = lambda: next(seq, 0.5)
+        # n*p == 2.0 < 10.0 selects the BG geometric method.
+        self.assertIn(random.binomialvariate(20, 0.1), range(21))
+
+
     def test_von_mises_range(self):
         # Issue 17149: von mises variates were not consistently in the
         # range [0, 2*PI].
