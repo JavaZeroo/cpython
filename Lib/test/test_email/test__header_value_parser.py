@@ -3123,6 +3123,21 @@ class TestFolding(TestEmailBase):
                                            "=?unknown-8bit?q?=A4?="),
                    prefix + "=?unknown-8bit?q?=C2?=\n =?unknown-8bit?q?=A4?=\n")
 
+    def test_long_ew_after_encoded_continuation_whitespace(self):
+        # When an encoded word begins a continuation line, the line's leading
+        # whitespace is emitted as its own encoded word.  The space it consumes
+        # must be subtracted from the budget, otherwise the following encoded
+        # word overflows max_line_length.
+        policy = self.policy.clone(max_line_length=40)
+        self._test(parser.get_unstructured(
+            'a b c d ä d .,ä,  dc cbaö,ä.,baaöa üa.,ü,c,äöäa,bööüc üü'),
+            'a b c d =?utf-8?b?w6QgZCAuLMOkLA==?=  dc\n'
+            ' =?utf-8?q?_?==?utf-8?b?Y2Jhw7Ysw6Qu?=\n'
+            ' =?utf-8?b?LGJhYcO2YSDDvGEuLMO8LGMs?=\n'
+            ' =?utf-8?b?w6TDtsOkYSxiw7bDtsO8YyA=?=\n'
+            ' =?utf-8?q?=C3=BC=C3=BC?=\n',
+            policy=policy)
+
     # XXX Need test of an encoded word so long that it needs to be wrapped
 
     def test_simple_address(self):

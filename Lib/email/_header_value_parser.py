@@ -3001,6 +3001,13 @@ def _fold_as_ew(to_encode, lines, maxlen, last_ew, ew_combine_allowed, charset, 
             encoded_word = _ew.encode(leading_whitespace, charset=encode_as)
             lines[-1] += encoded_word
             leading_whitespace = ''
+            # The leading whitespace was encoded as its own encoded word and
+            # appended to the line, so recompute the space left on the line.
+            remaining_space = maxlen - len(lines[-1])
+            text_space = remaining_space - chrome_len
+            if text_space <= 0:
+                lines.append(' ')
+                continue
 
         to_encode_word = to_encode[:text_space]
         encoded_word = _ew.encode(to_encode_word, charset=encode_as)
